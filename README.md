@@ -63,6 +63,26 @@ Then `import robot_interface` works without touching `sys.path`. The wheel is
 architecture-specific (built for the host arch: `amd64` on x86_64, `arm64` on
 aarch64) and links the matching `lib/cpp/<arch>/libunitree_legged_sdk.a`.
 
+### Automated releases
+
+`.github/workflows/release.yml` builds `manylinux_2_34` wheels for CPython
+3.9–3.13 on both **amd64** and **arm64** (native runners) via `cibuildwheel`.
+Push a version tag to build and publish them to a GitHub Release:
+
+```bash
+git tag v3.8.0
+git push origin v3.8.0
+```
+
+The tag version is stamped into the wheels, and every wheel is import-tested
+before release. (You can also trigger the workflow manually from the Actions
+tab to build wheels without cutting a release.)
+
+> Note: these wheels require **glibc >= 2.34** (Ubuntu 22.04+, Debian 12+,
+> RHEL 9+). The prebuilt SDK toolchain references `__libc_single_threaded`
+> (glibc 2.32), so older `manylinux` policies are not achievable without
+> rebuilding `libunitree_legged_sdk.a`.
+
 ### Run
 
 #### Cpp

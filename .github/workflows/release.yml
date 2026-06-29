@@ -1,0 +1,60 @@
+name: Build & release wheels
+
+# Push a tag like v3.8.0 to build wheels and attach them to a GitHub Release.
+# Or run manually (Actions tab -> "Run workflow") to build wheels without releasing.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build_wheels:
+    name: Wheels (${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest      # native amd64
+            arch: amd64
+          - os: ubuntu-24.04-arm   # native arm64 (free for public repos)
+            arch: arm64
+    steps:
+      - uses: actions/checkout@v4
+
+      # Make the wheel version match the release tag (vX.Y.Z -> X.Y.Z).
+      - name: Set version from tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          sed -i "s/^version = .*/version = \"$v\"/" pyproject.toml
+          echo "Building version $v"
+
+      # Builds cp39..cp313 manylinux_2_34 wheels for the runner's arch,
+      # auditwheel-repairs them, and import-tests each (config in pyproject.toml).
+      - uses: pypa/cibuildwheel@v2.23.3
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.arch }}
+          path: ./wheelhouse/*.whl
+
+  release:
+    name: Attach wheels to release
+    needs: build_wheels
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+      - name: List artifacts
+        run: ls -la dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.whl
+          generate_release_notes: true

@@ -12,3 +12,18 @@ license = { text = "BSD-3-Clause" }
 [tool.setuptools]
 # Extension-only distribution; no pure-python packages.
 py-modules = []
+
+[tool.cibuildwheel]
+# CPython 3.9–3.13; skip PyPy and musl (the prebuilt .a targets glibc).
+build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
+skip = "*-musllinux* pp*"
+# Native 64-bit only — prebuilt static libs exist for amd64/arm64, not i686.
+archs = "auto64"
+build-frontend = "build"
+# The toolchain pulls __libc_single_threaded@GLIBC_2.32 from libstdc++, so the
+# wheels cannot satisfy manylinux2014/_2_28. manylinux_2_34 (glibc >= 2.34) is
+# the lowest policy that fits — covers Ubuntu 22.04+, Debian 12+, RHEL 9+.
+manylinux-x86_64-image = "quay.io/pypa/manylinux_2_34_x86_64:latest"
+manylinux-aarch64-image = "quay.io/pypa/manylinux_2_34_aarch64:latest"
+# Import-check the freshly built wheel in an isolated env.
+test-command = "python -c \"import robot_interface as r; assert hasattr(r, 'Go1')\""
