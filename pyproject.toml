@@ -20,6 +20,9 @@ skip = "*-musllinux* pp*"
 # Native 64-bit only — prebuilt static libs exist for amd64/arm64, not i686.
 archs = "auto64"
 build-frontend = "build"
+# The SDK headers need Boost (header-only: bind/function/shared_ptr) and the
+# wrapper includes <msgpack.hpp>. Provide both inside the manylinux container.
+before-all = "dnf install -y boost-devel wget tar gzip && wget -q https://github.com/msgpack/msgpack-c/releases/download/cpp-3.3.0/msgpack-3.3.0.tar.gz -O /tmp/msgpack.tar.gz && tar -xzf /tmp/msgpack.tar.gz -C /tmp && cp -r /tmp/msgpack-3.3.0/include/* /usr/include/"
 # The toolchain pulls __libc_single_threaded@GLIBC_2.32 from libstdc++, so the
 # wheels cannot satisfy manylinux2014/_2_28. manylinux_2_34 (glibc >= 2.34) is
 # the lowest policy that fits — covers Ubuntu 22.04+, Debian 12+, RHEL 9+.
