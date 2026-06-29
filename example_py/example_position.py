@@ -1,11 +1,9 @@
 #!/usr/bin/python
 
-import sys
 import time
 import math
 import numpy as np
 
-sys.path.append('../lib/python/amd64')
 import robot_interface as sdk
 
 def jointLinearInterpolation(initPos, targetPos, rate):

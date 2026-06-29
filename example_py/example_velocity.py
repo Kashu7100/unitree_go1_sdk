@@ -1,10 +1,8 @@
 #!/usr/bin/python
 
-import sys
 import time
 import math
 
-sys.path.append('../lib/python/amd64')
 import robot_interface as sdk
 
 
