@@ -43,6 +43,26 @@ If can not find msgpack.hpp, then
 sudo apt install libmsgpack*
 ```
 
+### Build a Python wheel (Python 3.8 – 3.12)
+
+The legacy CMake path above vendors pybind11 2.6, which does **not** compile on
+Python >= 3.11. To build an installable wheel for a modern interpreter, use the
+`pyproject.toml` / `setup.py` at the repo root instead. They compile
+`python_wrapper/python_interface.cpp` against a current pybind11 (pulled in
+automatically as a build dependency) and link the prebuilt static library in
+`lib/cpp/<arch>/`.
+
+```bash
+# Builds dist/unitree_legged_sdk-*-cp<ver>-...-<arch>.whl for the chosen Python.
+pip install build
+python3.12 -m build --wheel        # or python3.11, python3.10, ...
+pip install dist/unitree_legged_sdk-*.whl
+```
+
+Then `import robot_interface` works without touching `sys.path`. The wheel is
+architecture-specific (built for the host arch: `amd64` on x86_64, `arm64` on
+aarch64) and links the matching `lib/cpp/<arch>/libunitree_legged_sdk.a`.
+
 ### Run
 
 #### Cpp

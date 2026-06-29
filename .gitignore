@@ -3,3 +3,9 @@ build
 *.o
 .vscode
 .clang-format
+
+# python packaging artifacts
+dist/
+build/
+*.egg-info/
+__pycache__/
